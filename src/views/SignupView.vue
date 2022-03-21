@@ -1,5 +1,4 @@
 <template>
-
   <form-sign-up-component/>
 </template>
 
