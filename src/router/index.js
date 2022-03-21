@@ -14,6 +14,16 @@ const routes = [
     component: HomeView
   },
   {
+    path: '/profil',
+    name: 'profil',
+    component: () => import('../views/profil/profil')
+  },
+  {
+    path: '/profil_events',
+    name: 'profil_events',
+    component: () => import('../views/profil/events')
+  },
+  {
     path: '/event/:id',
     name: 'event',
     component: EventView
