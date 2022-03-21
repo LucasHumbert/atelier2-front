@@ -7,6 +7,9 @@ import 'buefy/dist/buefy.css'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
+Vue.use(Buefy)
+Vue.use(VueAxios, axios)
+
 Vue.config.productionTip = false
 
 new Vue({
@@ -14,6 +17,3 @@ new Vue({
   store,
   render: function (h) { return h(App) }
 }).$mount('#app')
-
-Vue.use(Buefy)
-Vue.use(VueAxios, axios)
