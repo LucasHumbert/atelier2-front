@@ -1,14 +1,16 @@
 <template>
-  <signup-component/>
+
+  <form-sign-up-component/>
 </template>
 
 <script>
-import SignupComponent from "@/components/SignupComponent";
+import FormSignUpComponent from "@/components/FormSignUpComponent";
+
 
 export default {
   name: "SignupView",
   components : {
-    SignupComponent
+    FormSignUpComponent,
   }
 }
 </script>
