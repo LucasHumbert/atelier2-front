@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class ="has-text-centered">
+    <div class ="has-text-centered" v-if="this.$store.state.accessToken">
       <router-link to="/create/event">
         <b-button type="is-primary is-light">Créer un événement</b-button>
       </router-link>

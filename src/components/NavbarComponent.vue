@@ -14,7 +14,7 @@
       </b-navbar-item>
     </template>
 
-    <template #end>
+    <template #end v-if="!this.$store.state.accessToken">
       <b-navbar-item tag="div">
         <div class="buttons">
           <a class="button is-primary" @click="$router.push('/signup')">
@@ -26,12 +26,27 @@
         </div>
       </b-navbar-item>
     </template>
+
+    <template #end v-else>
+      <b-navbar-item tag="div">
+        <div class="buttons">
+          <a class="button is-primary" @click="disconnect">
+            <strong>Déconnexion</strong>
+          </a>
+        </div>
+      </b-navbar-item>
+    </template>
   </b-navbar>
 </template>
 
 <script>
 export default {
-  name: "NavbarComponent"
+  name: "NavbarComponent",
+  methods: {
+    disconnect(){
+      this.$store.commit('setToken', false)
+    }
+  }
 }
 </script>
 
