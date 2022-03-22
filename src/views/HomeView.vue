@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div class ="has-text-centered">
+      <router-link to="/create/event">
+        <b-button type="is-primary is-light">Créer un événement</b-button>
+      </router-link>
+    </div>
     <div class="columns is-multiline p-6">
       <cardevent-component description="test" name="Anniversaire de Baptiste" />
       <cardevent-component description="test" name="Anniversaire de Calvin" />
