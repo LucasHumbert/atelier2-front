@@ -26,12 +26,12 @@
                     <b-datepicker
                         ref="datepicker"
                         expanded
-                        icon="calendar"
                         placeholder="A quelle date ?">
                     </b-datepicker>
                     <b-button
                         @click="$refs.datepicker.toggle()"
-                        icon-left="calendar-today"
+                        icon-pack="fa-regular"
+                        icon-left="calendar"
                         type="is-primary" />
                   </b-field>
                 </div>
@@ -39,6 +39,7 @@
                   <b-field label="Heure">
                     <b-timepicker
                         placeholder="A quelle heure ?"
+                        icon-pack="fa-solid"
                         icon="clock"
                         :incrementMinutes="minutesGranularity"
                         :incrementHours="hoursGranularity"
@@ -66,18 +67,26 @@
                        label="Adresse"
                        class="column is-12"
               >
-                <b-input
-                    v-model="adress"
-                    type="text"
-                    placeholder="8 Rue Gabriel Mouilleron"
-                />
+                <div class="columns is-gapless">
+                  <b-input class="column is-4"
+                      v-model="city"
+                      type="text"
+                      placeholder="Nancy"
+                  />
+                  <b-input class="column"
+                      v-model="street"
+                      type="text"
+                      placeholder="8 Rue Gabriel Mouilleron"
+                  />
+                  <b-button type="is-primary" @click="addAdress">Placer le marqueur</b-button>
+                </div>
               </b-field>
             </div>
             <div id="map" v-if="ready">
               <template>
-                <l-map style="height: 300px" :zoom="zoom" :center="center" @click="addMarker">
+                <l-map style="height: 300px" :zoom="zoom" :center="center" @click="addMarker"  >
                   <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-                  <l-marker v-if="marker" :lat-lng="marker" @click="removeMarker(index)"></l-marker>
+                  <l-marker v-if="marker" :lat-lng="marker"></l-marker>
                 </l-map>
               </template>
             </div>
@@ -102,7 +111,8 @@ export default {
       hoursGranularity: 2,
       title: '',
       description: '',
-      adress: '',
+      street: '',
+      city: '',
       date: '',
       confpassword: '',
       ready: false,
@@ -111,7 +121,6 @@ export default {
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       zoom: 15,
       center: [48.6822, 6.1862],
-      markerLatLng: [48.6822, 6.1862],
       marker: '',
       index: '',
     }
@@ -119,19 +128,68 @@ export default {
   mounted() {
     this.axios.get('http://ip-api.com/json/')
         .then((response) => {
-          this.center =  [response.data.lat, response.data.lon ]
+          this.center =  [response.data.lat, response.data.lon]
           this.ready = true
         })
   },
   methods: {
-    removeMarker(index) {
-      index = index - 1;
-      this.markers.splice(index, 1);
+    addStreet() {
+      if (this.street !== '') {
+        this.AdressToLatLng()
+      }
+    },
+    addCity() {
+      if (this.city !== '') {
+        this.AdressToLatLng()
+      }
+    },
+    addAdress() {
+      if (this.concatAdress !== ''){
+        this.AdressToLatLng()
+        console.log("CLICK")
+      }
     },
     addMarker(event) {
-      console.log(event.latlng)
       this.marker = event.latlng
+      this.LatLngToAdress()
       console.log(this.marker)
+    },
+    AdressToLatLng() {
+      this.axios.get(`https://api.geoapify.com/v1/geocode/search?text=${this.adress}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
+          .then((response) => {
+            let data = response.data.features[0].properties;
+            this.marker = [data.lat, data.lon]
+            this.center = [data.lat, data.lon]
+            console.log(this.marker)
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    },
+    LatLngToAdress() {
+      this.axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${this.marker.lat}&lon=${this.marker.lng}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
+          .then((response) => {
+            let data = response.data.features[0].properties;
+            if (data.housenumber){
+              this.center = [data.lat, data.lon]
+              this.street =  data.housenumber + " " + data.street
+              this.city = data.city
+              this.adress = data.city + " " + data.street
+            }
+            else {
+              this.street = data.street
+              this.city = data.city
+              this.adress = this.city + " " + data.street
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+  },
+  computed: {
+    concatAdress() {
+      return this.city + ' ' + this.street
     }
   }
 }
