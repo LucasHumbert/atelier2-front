@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 import EventView from "@/views/EventView";
 import SignupView from "@/views/SignupView";
 import SigninView from "@/views/SigninView";
+import EventCreationView from "@/views/EventCreationView";
 
 Vue.use(VueRouter)
 
@@ -37,6 +38,11 @@ const routes = [
     path: '/signin',
     name: 'signin',
     component: SigninView
+  },
+  {
+    path: '/create/event',
+    name: 'createevent',
+    component: EventCreationView
   }
 ]
 
