@@ -1,33 +1,28 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VuexPersistence from "vuex-persist";
+
+const vuexLocal = new VuexPersistence({
+  storage: window.localStorage
+})
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    ready: false,
-    connectionToken: "",
-    member: false,
-    members: []
+    accessToken: "",
   },
   getters: {
-    getMember: (state) => (idMember) => {
-      return state.members.find(member => member.id === idMember)
-    }
+
   },
   mutations: {
     setToken(state, token){
-      state.connectionToken = token
+      state.accessToken = token
     },
-    setMember(state, member) {
-      state.member = member
-    },
-    setMembers(state, members) {
-      state.members = members
-    }
   },
   actions: {
   },
   modules: {
-  }
+  },
+  plugins: [vuexLocal.plugin]
 })
