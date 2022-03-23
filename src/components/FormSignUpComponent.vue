@@ -70,9 +70,9 @@
               </b-field>
             </div>
             <div class="is-flex is-justify-content-center pb-4 pt-4">
-              <b-button>
+              <button class="button">
                 Inscription
-              </b-button>
+              </button>
             </div>
           </section>
         </div>
@@ -96,9 +96,20 @@ export default {
   },
   methods: {
     signup() {
+      console.log('Je suis cliqué')
       if (this.nom && this.prenom && this.email && this.password && this.confpassword) {
         if (this.password === this.confpassword) {
-          // Requete POST API
+          this.axios.post('http://api.auth.local:62563/register', {
+            firstname: this.nom,
+            lastname: this.prenom,
+            mail: this.email,
+            password: this.password,
+            confirmpassword: this.confpassword
+          }).then((response) => {
+            this.$router.push('/signin')
+          }).catch((error) => {
+            this.$buefy.toast.open("Problème lors de l'inscription")
+          })
         } else {
           this.$buefy.toast.open('Les mots de passe ne correspondent pas')
         }
