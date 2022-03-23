@@ -1,6 +1,6 @@
 <template>
   <div class="columns is-multiline is-justify-content-center">
-    <form class="box column is-8 mt-6" @submit.prevent="signup">
+    <form class="box column is-8 mt-6" @submit.prevent="postEvent">
       <div class="column is-12">
         <div>
           <h1 class="has-text-centered is-size-4 pt-4">
@@ -24,6 +24,7 @@
                 <div class="column is-half">
                   <b-field label="Date">
                     <b-datepicker
+                        v-model="date"
                         ref="datepicker"
                         expanded
                         placeholder="A quelle date ?">
@@ -32,12 +33,14 @@
                         @click="$refs.datepicker.toggle()"
                         icon-pack="fa-regular"
                         icon-left="calendar"
-                        type="is-primary" />
+                        type="is-primary"/>
                   </b-field>
                 </div>
+                {{date.toISOString().split('T')[0]}}
                 <div class="column is-half">
                   <b-field label="Heure">
                     <b-timepicker
+                        v-model="hours"
                         placeholder="A quelle heure ?"
                         icon-pack="fa-solid"
                         icon="clock"
@@ -47,6 +50,7 @@
                     </b-timepicker>
                   </b-field>
                 </div>
+                {{hours.toLocaleTimeString()}}
               </section>
             </div>
             <div class="is-flex is-justify-content-center">
@@ -63,37 +67,44 @@
               </b-field>
             </div>
             <div class="is-flex is-justify-content-center">
-              <b-field
-                       label="Adresse"
-                       class="column is-12"
-              >
-                <div class="columns is-gapless">
-                  <b-input class="column is-4"
-                      v-model="city"
-                      type="text"
-                      placeholder="Nancy"
-                  />
-                  <b-input class="column"
-                      v-model="street"
-                      type="text"
-                      placeholder="8 Rue Gabriel Mouilleron"
-                  />
-                  <b-button type="is-primary" @click="addAdress">Placer le marqueur</b-button>
-                </div>
-              </b-field>
+              <b-radio v-model="public"
+                       name="public"
+                       native-value="true">
+                Public
+              </b-radio>
+              <b-radio v-model="public"
+                       name="prive"
+                       native-value="false">
+                Privé
+              </b-radio>
+            </div>
+            <b-field
+                label="Adresse"
+                class="column is-12"/>
+
+            <div class="columns is-gapless">
+              <b-input class="column is-3"
+                       v-model="city"
+                       type="text"
+                       placeholder="Nancy"/>
+              <b-input class="column"
+                       v-model="street"
+                       type="text"
+                       placeholder="8 Rue Gabriel Mouilleron"/>
+              <b-button type="is-primary" @click="addAddress">Placer le marqueur</b-button>
             </div>
             <div id="map" v-if="ready">
               <template>
-                <l-map style="height: 300px" :zoom="zoom" :center="center" @click="addMarker"  >
+                <l-map style="height: 300px" :zoom="zoom" :center="center" @click="addMarker">
                   <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
                   <l-marker v-if="marker" :lat-lng="marker"></l-marker>
                 </l-map>
               </template>
             </div>
             <div class="is-flex is-justify-content-center pb-4 pt-4">
-              <b-button>
+              <button class="button">
                 Créer l'événement
-              </b-button>
+              </button>
             </div>
           </section>
         </div>
@@ -113,8 +124,10 @@ export default {
       description: '',
       street: '',
       city: '',
-      date: '',
-      confpassword: '',
+      address: '',
+      date: new Date(),
+      hours: new Date(),
+      public: false,
       ready: false,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
@@ -128,59 +141,70 @@ export default {
   mounted() {
     this.axios.get('http://ip-api.com/json/')
         .then((response) => {
-          this.center =  [response.data.lat, response.data.lon]
+          this.center = [response.data.lat, response.data.lon]
           this.ready = true
         })
   },
   methods: {
-    addStreet() {
-      if (this.street !== '') {
-        this.AdressToLatLng()
-      }
-    },
-    addCity() {
-      if (this.city !== '') {
-        this.AdressToLatLng()
-      }
-    },
-    addAdress() {
-      if (this.concatAdress !== ''){
-        this.AdressToLatLng()
-        console.log("CLICK")
+    addAddress() {
+      if (this.concatAddress !== '') {
+        this.AddressToLatLng()
       }
     },
     addMarker(event) {
       this.marker = event.latlng
-      this.LatLngToAdress()
+      this.LatLngToAddress()
       console.log(this.marker)
     },
-    AdressToLatLng() {
-      this.axios.get(`https://api.geoapify.com/v1/geocode/search?text=${this.adress}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
+    AddressToLatLng() {
+      this.axios.get(`https://api.geoapify.com/v1/geocode/search?text=${this.concatAddress}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
           .then((response) => {
             let data = response.data.features[0].properties;
+            console.log(data)
             this.marker = [data.lat, data.lon]
             this.center = [data.lat, data.lon]
-            console.log(this.marker)
           })
           .catch(function (error) {
             console.log(error);
           });
     },
-    LatLngToAdress() {
+    LatLngToAddress() {
       this.axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${this.marker.lat}&lon=${this.marker.lng}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
           .then((response) => {
             let data = response.data.features[0].properties;
-            if (data.housenumber){
+            if (data.housenumber) {
               this.center = [data.lat, data.lon]
-              this.street =  data.housenumber + " " + data.street
+              this.street = data.housenumber + " " + data.street
               this.city = data.city
-              this.adress = data.city + " " + data.street
-            }
-            else {
+              this.address = data.city + " " + data.street
+            } else {
               this.street = data.street
               this.city = data.city
-              this.adress = this.city + " " + data.street
+              this.address = this.city + " " + data.street
             }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    },
+    postEvent() {
+      let fusion = this.date.toISOString().split('T')[0] + ' ' + this.hours.toLocaleTimeString()
+      let date = new Date(fusion);
+      console.log(date)
+      this.axios.post(`http://api.event.local:62560/events`, {
+        title: this.title,
+        description: this.description,
+        address: this.address,
+        date: fusion,
+        lat: this.marker.lat,
+        lon: this.marker.lng,
+        public: this.public
+      }, {
+        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+      })
+          .then((response) => {
+            console.log(response.data)
+            this.$router.push(`/event/${response.data}`)
           })
           .catch(function (error) {
             console.log(error);
@@ -188,7 +212,7 @@ export default {
     }
   },
   computed: {
-    concatAdress() {
+    concatAddress() {
       return this.city + ' ' + this.street
     }
   }
