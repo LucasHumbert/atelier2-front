@@ -19,9 +19,15 @@
 <script>
 import AccountLayout from "@/components/AccountLayout";
 import CardEvent from "@/components/CardEvent";
+import axios from "axios";
 export default {
   name: "events",
   components: {CardEvent, AccountLayout}
+  data () {
+    return {
+      events: []
+    }
+  }
 }
 </script>
 
