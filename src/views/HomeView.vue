@@ -6,8 +6,8 @@
       </router-link>
     </div>
     <div class="columns is-multiline p-6">
-      <cardevent-component description="test" name="Anniversaire de Baptiste" />
-      <cardevent-component description="test" name="Anniversaire de Calvin" />
+      <cardevent-component id="1" description="test" name="Anniversaire de Baptiste" />
+      <cardevent-component id="2" description="test" name="Anniversaire de Calvin" />
       <cardevent-component description="test" name="Anniversaire de Lucas" />
       <cardevent-component description="test" name="Anniversaire de Kévin" />
       <cardevent-component description="test" name="Anniversaire de Jean" />
