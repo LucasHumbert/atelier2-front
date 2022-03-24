@@ -1,5 +1,5 @@
 <template>
-  <div class="columns">
+  <div v-if="ready" class="columns">
     <b-loading :is-full-page="true" v-model="isLoading"></b-loading>
     <div class="column is-half">
       <l-map style="" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
@@ -40,7 +40,8 @@ export default {
       attribution:
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       zoom: 15,
-      isLoading: true
+      isLoading: true,
+      ready: false
     };
   },
   computed: {
@@ -54,6 +55,7 @@ export default {
     this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}`).then((response) => {
       this.eventInfo = response.data;
       this.isLoading = false;
+      this.ready = true
       console.log(this.eventInfo)
     });
   }
