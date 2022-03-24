@@ -36,7 +36,6 @@
                         type="is-primary"/>
                   </b-field>
                 </div>
-                {{date.toISOString().split('T')[0]}}
                 <div class="column is-half">
                   <b-field label="Heure">
                     <b-timepicker
@@ -50,7 +49,6 @@
                     </b-timepicker>
                   </b-field>
                 </div>
-                {{hours.toLocaleTimeString()}}
               </section>
             </div>
             <div class="is-flex is-justify-content-center">
@@ -87,10 +85,14 @@
                        v-model="city"
                        type="text"
                        placeholder="Nancy"/>
+              <b-input class="column is-1"
+                       v-model="housenumber"
+                       type="text"
+                       placeholder="8"/>
               <b-input class="column"
                        v-model="street"
                        type="text"
-                       placeholder="8 Rue Gabriel Mouilleron"/>
+                       placeholder="Rue Gabriel Mouilleron"/>
               <b-button type="is-primary" @click="addAddress">Placer le marqueur</b-button>
             </div>
             <div id="map" v-if="ready">
@@ -125,6 +127,7 @@ export default {
       street: '',
       city: '',
       address: '',
+      housenumber: '',
       date: new Date(),
       hours: new Date(),
       public: false,
@@ -154,15 +157,16 @@ export default {
     addMarker(event) {
       this.marker = event.latlng
       this.LatLngToAddress()
-      console.log(this.marker)
     },
     AddressToLatLng() {
-      this.axios.get(`https://api.geoapify.com/v1/geocode/search?text=${this.concatAddress}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
+      this.axios.get(`https://api.geoapify.com/v1/geocode/search?housenumber=${this.housenumber}&street=${this.street}&city=${this.city}&format=json&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
           .then((response) => {
-            let data = response.data.features[0].properties;
-            console.log(data)
+            console.log(response.data)
+            let data = response.data.results[0];
+            this.housenumber = data.housenumber
             this.marker = [data.lat, data.lon]
             this.center = [data.lat, data.lon]
+            this.address = this.concatAddress
           })
           .catch(function (error) {
             console.log(error);
@@ -172,16 +176,11 @@ export default {
       this.axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${this.marker.lat}&lon=${this.marker.lng}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
           .then((response) => {
             let data = response.data.features[0].properties;
-            if (data.housenumber) {
               this.center = [data.lat, data.lon]
-              this.street = data.housenumber + " " + data.street
-              this.city = data.city
-              this.address = data.city + " " + data.street
-            } else {
+              this.housenumber = data.housenumber
               this.street = data.street
               this.city = data.city
-              this.address = this.city + " " + data.street
-            }
+              this.address = data.city + " " + data.street
           })
           .catch(function (error) {
             console.log(error);
@@ -189,22 +188,19 @@ export default {
     },
     postEvent() {
       let fusion = this.date.toISOString().split('T')[0] + ' ' + this.hours.toLocaleTimeString()
-      let date = new Date(fusion);
-      console.log(date)
       this.axios.post(`http://api.event.local:62560/events`, {
         title: this.title,
         description: this.description,
         address: this.address,
         date: fusion,
-        lat: this.marker.lat,
-        lon: this.marker.lng,
+        lat: this.marker[0],
+        lon: this.marker[1],
         public: this.public
       }, {
         headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
       })
           .then((response) => {
-            console.log(response.data)
-            this.$router.push(`/event/${response.data}`)
+            this.$router.push(`/event/${response.data.event.id}`)
           })
           .catch(function (error) {
             console.log(error);
@@ -213,7 +209,7 @@ export default {
   },
   computed: {
     concatAddress() {
-      return this.city + ' ' + this.street
+      return this.city + ' ' + this.housenumber + ' ' + this.street
     }
   }
 }
