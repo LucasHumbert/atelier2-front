@@ -9,7 +9,7 @@
           <b-navbar-item tag="router-link" to="profil_events" class="is-size-5 is-underlined">
             Mes Évènements
           </b-navbar-item>
-          <b-navbar-item tag="router-link" to="profil_events" class="is-size-5 is-underlined">
+          <b-navbar-item tag="router-link" to="profil_eventsCreated" class="is-size-5 is-underlined">
             Évènements Créés
           </b-navbar-item>
         </template>

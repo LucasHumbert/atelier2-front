@@ -2,15 +2,15 @@
   <div class="une_recette column is-4" style="position: relative">
     <div class="card">
       <div class="card-header">
-        <h1 class="card-header-title is-centered">Titre</h1>
+        <h1 class="card-header-title is-centered">{{ event.title }}</h1>
       </div>
       <div class="card-content">
         <div class="is-mobile">
           <div class="content">
-            <p><span class="is-underlined">Date</span> : 23 avril 2022</p>
+            <p><span class="is-underlined">Date</span> : {{event.date}}</p>
           </div>
           <div class="content">
-            <p><span class="is-underlined">Lieu</span> : 14 rue des champignons</p>
+            <p><span class="is-underlined">Lieu</span> : {{event.address}}</p>
           </div>
         </div>
       </div>
@@ -20,10 +20,15 @@
 
 <script>
 export default {
-  name: "CardEvent"
+  name: "CardEvent",
+  props : ['event']
 }
 </script>
 
 <style scoped>
-
+h1, p{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>

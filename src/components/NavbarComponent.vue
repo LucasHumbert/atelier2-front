@@ -12,6 +12,9 @@
       <b-navbar-item href="/">
         Home
       </b-navbar-item>
+      <b-navbar-item v-if="$store.state.accessToken" href="/profil">
+        Profil
+      </b-navbar-item>
     </template>
 
     <template #end v-if="!this.$store.state.accessToken">
@@ -45,6 +48,7 @@ export default {
   methods: {
     disconnect(){
       this.$store.commit('setToken', false)
+      this.$router.push('/')
     }
   }
 }
