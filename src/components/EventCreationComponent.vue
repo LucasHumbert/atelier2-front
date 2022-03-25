@@ -208,7 +208,7 @@ export default {
         });
       } else {
         this.$buefy.toast.open({
-          duration: 5000,
+          duration: 2000,
           message: `Veuillez renseigner tous les champs`,
           type: 'is-danger'
         })
