@@ -25,7 +25,6 @@ export default {
   data () {
     return {
       events: [],
-      user: 'test'
     }
   },
   mounted () {
@@ -41,7 +40,6 @@ export default {
       this.axios.get(`${this.$urlEvent}/users/${this.$store.state.accessToken}/events`)
           .then(response => {
         this.events = response.data.events
-            console.log(this.events)
       }).catch(
 
       )
