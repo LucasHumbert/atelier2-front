@@ -1,8 +1,10 @@
 <template>
-  <div v-if="ready" class="columns">
+<div v-if="ready">
+  <div class="columns">
     <b-loading :is-full-page="true" v-model="isLoading"></b-loading>
-    <div class="column is-half">
-      <l-map  v-if="!isCardModalActive"  style="" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
+
+    <div class="column is-half m-4">
+      <l-map style="" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
         <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
         <l-marker :lat-lng="[this.eventInfo.event.lat, this.eventInfo.event.lon]"></l-marker>
       </l-map>
@@ -13,22 +15,23 @@
         <h5 class="subtitle mt-1 is-5"> {{ eventInfo.event.description }} </h5>
         <h5 class="subtitle mt-1 is-5" v-if="!isLoading"> Quand ? {{ dateConverter }} </h5>
         <h5 class="subtitle mt-1 is-5"> Où ? {{ eventInfo.event.address }} </h5>
+        <button class="button is-info" @click="copyToClipboard"> Copier le lien dans le presse-papier</button>
         <div>
           <b-button v-if="this.eventInfo.users.length > 0" type="is-info is-light" @click="isCardModalActive=true">Voir les participants</b-button>
           <b-button v-else type="is-info is-light">Aucun participant</b-button>
         </div>
       </div>
       <hr>
-      <div class="is-flex is-justify-content-center">
-        <button class="button is-success mr-4">Je viens !</button>
-        <button class="button is-danger">Je ne viens pas !</button>
-      </div>
-      <div class="card">
-        <div class="card-content mt-2">
-          <h6> <span class="is-underlined">Lana</span>: Je viens !</h6>
-          <h6> <span class="is-underlined">Didier</span>: Je viens !</h6>
+      <div v-if="this.$store.state.accessToken">
+        <div class="is-flex is-justify-content-center" v-if="showChoiceButton">
+          <button class="button is-success mr-4" @click="changeChoice(1); showChoiceButton = false" >Je viens !</button>
+          <button class="button is-danger" @click="changeChoice(0); showChoiceButton = false"  >Je ne viens pas !</button>
+        </div>
+        <div class="is-flex is-justify-content-center" v-else>
+          <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true"  >J'ai changé d'avis</button>
         </div>
       </div>
+      <div v-else> Rejoindre en tant que guest ?</div>
     </div>
 
     <b-modal v-model="isCardModalActive" :width="640">
@@ -66,6 +69,14 @@
       </div>
     </b-modal>
   </div>
+  <div class="card">
+    <div class="card-content mt-2">
+      <template v-for="text in textHtml">
+        <strong> {{firstname}} {{lastname}}</strong> {{text}} <br>
+      </template>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
@@ -81,6 +92,12 @@ export default {
       zoom: 15,
       isLoading: true,
       ready: false,
+      urlToCopy: window.location.href,
+      choice: '',
+      textHtml:[],
+      firstname: '',
+      lastname: '',
+      showChoiceButton: true,
       isCardModalActive: false,
       selectedFilterOption: 3
     };
@@ -93,12 +110,67 @@ export default {
     }
   },
   mounted() {
+
+    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?filter[]=userConnected`,{
+      headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}})
+        .then((response) => {
+      this.eventInfo = response.data;
+      this.isLoading = false;
+      this.ready = true;
+      console.log(response.data)
+      this.firstname = response.data.userConnected.firstname;
+      this.lastname = response.data.userConnected.lastname
+      if(response.data.inEvent === true && response.data.choice !== 2){
+        this.showChoiceButton = false
+      }
+
     this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`).then((response) => {
       this.eventInfo = response.data;
       this.isLoading = false;
       this.ready = true
-      //console.log(this.eventInfo)
     });
+  },
+  methods: {
+    copyToClipboard() {
+      navigator.clipboard.writeText(this.urlToCopy);
+      this.$buefy.toast.open("Vous avez copié le lien de l'événement dans le presse-papier")
+    },
+    changeChoice(value) {
+      if (this.eventInfo.inEvent === false){
+        this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{
+          choice: value
+        },{
+          headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+        })
+            .then((response) => {
+              if(value === 1) {
+                this.textHtml.push(' : Je viendrai')
+              } else if (value === 0) {
+                this.textHtml.push(' : Je ne viendrai pas')
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+      }
+      else {
+        this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{
+          choice: value
+        },{
+          headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+        })
+            .then((response) => {
+              if(value === 1) {
+                this.textHtml.push(' : Je viendrai')
+              } else if (value === 0) {
+                this.textHtml.push(' : Je ne viendrai pas')
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+      }
+    },
   }
 }
 </script>
