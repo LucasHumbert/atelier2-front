@@ -110,26 +110,26 @@ export default {
     }
   },
   mounted() {
-
     this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?filter[]=userConnected`,{
       headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}})
         .then((response) => {
-      this.eventInfo = response.data;
-      this.isLoading = false;
-      this.ready = true;
-      console.log(response.data)
-      this.firstname = response.data.userConnected.firstname;
-      this.lastname = response.data.userConnected.lastname
-      if(response.data.inEvent === true && response.data.choice !== 2){
-        this.showChoiceButton = false
-      }
+          this.eventInfo = response.data;
+          this.isLoading = false;
+          this.ready = true;
+          console.log(response.data)
+          this.firstname = response.data.userConnected.firstname;
+          this.lastname = response.data.userConnected.lastname
+          if (response.data.inEvent === true && response.data.choice !== 2) {
+            this.showChoiceButton = false
+          }
 
-    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`).then((response) => {
-      this.eventInfo = response.data;
-      this.isLoading = false;
-      this.ready = true
-    });
-  },
+          this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`).then((response) => {
+            this.eventInfo = response.data;
+            this.isLoading = false;
+            this.ready = true
+          });
+        });
+    },
   methods: {
     copyToClipboard() {
       navigator.clipboard.writeText(this.urlToCopy);
