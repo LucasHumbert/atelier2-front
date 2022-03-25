@@ -155,7 +155,7 @@ export default {
       }
     },
     addMarker(event) {
-      this.marker = event.latlng
+      this.marker = [event.latlng.lat, event.latlng.lng]
       this.LatLngToAddress()
     },
     AddressToLatLng() {
@@ -173,7 +173,7 @@ export default {
           });
     },
     LatLngToAddress() {
-      this.axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${this.marker.lat}&lon=${this.marker.lng}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
+      this.axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${this.marker[0]}&lon=${this.marker[1]}&apiKey=d85ed141771b4ab8a3b0304bd9a79b5f`)
           .then((response) => {
             let data = response.data.features[0].properties;
               this.center = [data.lat, data.lon]
@@ -187,24 +187,32 @@ export default {
           });
     },
     postEvent() {
-      let fusion = this.date.toISOString().split('T')[0] + ' ' + this.hours.toLocaleTimeString()
-      this.axios.post(`http://api.event.local:62560/events`, {
-        title: this.title,
-        description: this.description,
-        address: this.address,
-        date: fusion,
-        lat: this.marker[0],
-        lon: this.marker[1],
-        public: this.public
-      }, {
-        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
-      })
-          .then((response) => {
-            this.$router.push(`/event/${response.data.event.id}`)
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
+      if (this.title !== '' && this.description !== '' && this.address !== '') {
+        let fusion = this.date.toISOString().split('T')[0] + ' ' + this.hours.toLocaleTimeString()
+        this.axios.post(`http://api.event.local:62560/events`, {
+          title: this.title,
+          description: this.description,
+          address: this.address,
+          date: fusion,
+          lat: this.marker[0],
+          lon: this.marker[1],
+          public: this.public
+        }, {
+          headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+        })
+        .then((response) => {
+          this.$router.push(`/event/${response.data.event.id}`)
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      } else {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: `Veuillez renseigner tous les champs`,
+          type: 'is-danger'
+        })
+      }
     }
   },
   computed: {
