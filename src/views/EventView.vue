@@ -4,7 +4,7 @@
       <b-loading :is-full-page="true" v-model="isLoading"></b-loading>
 
       <div class="column is-half m-4">
-        <l-map v-if="!isCardModalActive" style="" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
+        <l-map style="z-index: 1" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
           <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
           <l-marker :lat-lng="[this.eventInfo.event.lat, this.eventInfo.event.lon]"></l-marker>
         </l-map>
@@ -22,6 +22,10 @@
                       @click="isCardModalActive=true">Voir les participants
             </b-button>
             <b-button v-else type="is-info is-light">Aucun participant</b-button>
+            <b-button v-if="this.guests && this.guests.length > 0" type="is-info is-light" class="ml-3"
+                      @click="isModalGuestsActive=true">Voir les invités
+            </b-button>
+            <b-button v-else type="is-info is-light" class="ml-3">Aucun invité</b-button>
           </div>
         </div>
         <hr>
@@ -36,9 +40,12 @@
             <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true">J'ai changé d'avis</button>
           </div>
         </div>
-        <div v-else> Rejoindre en tant que guest ?</div>
+        <div v-else>
+          <button v-if="showButtonGuest" class="button is-link" @click="guestJoin">Rejoindre en tant qu'invité</button>
+        </div>
       </div>
 
+      <!-- Modal participants -->
       <b-modal v-model="isCardModalActive" :width="640">
         <div class="card">
           <div class="card-header">
@@ -73,6 +80,24 @@
           </div>
         </div>
       </b-modal>
+
+      <!-- Modal guests -->
+      <b-modal v-model="isModalGuestsActive" :width="640">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-title is-size-4">Invités de {{ eventInfo.event.title }}</div>
+          </div>
+          <div class="card-content">
+            <div class="content">
+              <ul>
+                <li v-for="guest in this.guests">
+                  {{ guest.name }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </b-modal>
     </div>
     <div class="card">
       <div class="card-content mt-2">
@@ -91,6 +116,8 @@ export default {
   data() {
     return {
       eventInfo: {},
+      guests: [],
+      showButtonGuest: true,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -104,6 +131,7 @@ export default {
       lastname: '',
       showChoiceButton: true,
       isCardModalActive: false,
+      isModalGuestsActive: false,
       selectedFilterOption: 3
     };
   },
@@ -138,6 +166,11 @@ export default {
       this.ready = true
     });
 
+    this.axios.get(`http://api.event.local:62560/guests/${this.$route.params.id}`)
+    .then(response => {
+      this.guests = response.data.guests
+    })
+
   },
   methods: {
     copyToClipboard() {
@@ -151,16 +184,16 @@ export default {
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
         })
-            .then((response) => {
-              if (value === 1) {
-                this.textHtml.push(' : Je viendrai')
-              } else if (value === 0) {
-                this.textHtml.push(' : Je ne viendrai pas')
-              }
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+        .then((response) => {
+          if (value === 1) {
+            this.textHtml.push(' : Je viendrai')
+          } else if (value === 0) {
+            this.textHtml.push(' : Je ne viendrai pas')
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       } else {
         this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`, {
           choice: value
@@ -179,6 +212,28 @@ export default {
             });
       }
     },
+    guestJoin() {
+      this.$buefy.dialog.prompt({
+        message: `Quel est votre nom ?`,
+        inputAttrs: {
+          maxlength: 50
+        },
+        trapFocus: true,
+        onConfirm: (value) => {
+          this.axios.post(`http://api.event.local:62560/guests/${this.$route.params.id}`, {
+            name: value
+          })
+          .then(() => {
+            this.$buefy.toast.open(`Vous êtes enregistré en tant que ${value}`)
+            this.guests.push({'name': value})
+            this.showButtonGuest = false
+          })
+          .catch(error => {
+            console.log(error)
+          })
+        }
+      })
+    }
   }
 }
 </script>
