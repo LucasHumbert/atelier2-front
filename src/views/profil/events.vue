@@ -37,12 +37,11 @@ export default {
   },
   methods: {
     loadEvents() {
-      this.axios.get(`${this.$urlEvent}/users/${this.$store.state.accessToken}/events`)
-          .then(response => {
+      this.axios.get(`${this.$urlEvent}/users/${this.$store.state.accessToken}/events`,{
+        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+      }).then(response => {
         this.events = response.data.events
-      }).catch(
-
-      )
+      })
     }
   }
 }
