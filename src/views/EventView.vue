@@ -2,7 +2,7 @@
 <div v-if="ready">
   <div class="columns">
     <b-loading :is-full-page="true" v-model="isLoading"></b-loading>
-    <div class="column is-half">
+    <div class="column is-half m-4">
       <l-map style="" :zoom="zoom" :center="[this.eventInfo.event.lat, this.eventInfo.event.lon]">
         <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
         <l-marker :lat-lng="[this.eventInfo.event.lat, this.eventInfo.event.lon]"></l-marker>
@@ -19,11 +19,11 @@
       <hr>
       <div v-if="this.$store.state.accessToken">
         <div class="is-flex is-justify-content-center" v-if="showChoiceButton">
-          <button class="button is-success mr-4" @click="postChoice(1)" >Je viens !</button>
-          <button class="button is-danger" @click="postChoice(0)"  >Je ne viens pas !</button>
+          <button class="button is-success mr-4" @click="changeChoice(1); showChoiceButton = false" >Je viens !</button>
+          <button class="button is-danger" @click="changeChoice(0); showChoiceButton = false"  >Je ne viens pas !</button>
         </div>
         <div class="is-flex is-justify-content-center" v-else>
-          <button class="button is-dark" @click="showChoice"  >J'ai changé d'avis</button>
+          <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true"  >J'ai changé d'avis</button>
         </div>
       </div>
       <div v-else> Rejoindre en tant que guest ?</div>
@@ -32,7 +32,7 @@
   <div class="card">
     <div class="card-content mt-2">
       <template v-for="text in textHtml">
-        <strong> {{firstname}}</strong> {{text}} <br>
+        <strong> {{firstname}} {{lastname}}</strong> {{text}} <br>
       </template>
     </div>
   </div>
@@ -56,6 +56,7 @@ export default {
       choice: '',
       textHtml:[],
       firstname: '',
+      lastname: '',
       showChoiceButton: true,
     };
   },
@@ -67,54 +68,61 @@ export default {
     }
   },
   mounted() {
-    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}`).then((response) => {
+    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?filter[]=userConnected`,{
+      headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}})
+        .then((response) => {
       this.eventInfo = response.data;
       this.isLoading = false;
-      this.ready = true
-      console.log(this.eventInfo)
+      this.ready = true;
+      console.log(response.data)
+      this.firstname = response.data.userConnected.firstname;
+      this.lastname = response.data.userConnected.lastname
+      if(response.data.inEvent === true && response.data.choice !== 2){
+        this.showChoiceButton = false
+      }
     });
-    this.axios.get('http://api.auth.local:62563/me', {
-      headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
-    }) .then((response) => {
-      this.firstname = response.data.profile.firstname
-    })
-        .catch(function (error) {
-          console.log(error);
-        });
   },
   methods: {
     copyToClipboard() {
       navigator.clipboard.writeText(this.urlToCopy);
       this.$buefy.toast.open("Vous avez copié le lien de l'événement dans le presse-papier")
     },
-    postChoice(value) {
-      if(value === 1) {
-        this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{},{
+    changeChoice(value) {
+      if (this.eventInfo.inEvent === false){
+        this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{
+          choice: value
+        },{
           headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
         })
             .then((response) => {
-              this.textHtml.push(' : Je viendrai')
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-      } else if (value === 0) {
-        this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{},{
-          headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
-        })
-            .then((response) => {
-              this.textHtml.push(' : Je ne viendrai pas')
+              if(value === 1) {
+                this.textHtml.push(' : Je viendrai')
+              } else if (value === 0) {
+                this.textHtml.push(' : Je ne viendrai pas')
+              }
             })
             .catch(function (error) {
               console.log(error);
             });
       }
-      this.showChoiceButton = false;
+      else {
+        this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`,{
+          choice: value
+        },{
+          headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+        })
+            .then((response) => {
+              if(value === 1) {
+                this.textHtml.push(' : Je viendrai')
+              } else if (value === 0) {
+                this.textHtml.push(' : Je ne viendrai pas')
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+      }
     },
-    showChoice () {
-      this.showChoiceButton = true
-    }
-
   }
 }
 </script>
