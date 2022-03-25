@@ -43,7 +43,21 @@
 export default {
   data () {
     return {
+      listEvents : [],
       notification: false
+    }
+  },
+  mounted () {
+    this.loadEvents()
+  },
+  methods : {
+    loadEvents(){
+      this.axios.get(`${this.$urlEvent}/users/events`,{
+        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+      }).then(response => {
+        response.data.events.forEach()
+        //this.events = response.data.events
+      })
     }
   }
 }
