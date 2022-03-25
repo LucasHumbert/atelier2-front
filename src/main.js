@@ -26,6 +26,8 @@ Vue.component('l-marker', LMarker);
 Vue.use(Buefy)
 Vue.use(VueAxios, axios)
 
+Vue.prototype.$urlEvent = 'http://api.event.local:62560/';
+
 Vue.config.productionTip = false
 
 new Vue({
