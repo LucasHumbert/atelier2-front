@@ -5,12 +5,10 @@
         <b-button type="is-primary is-light">Créer un événement</b-button>
       </router-link>
     </div>
-    <div class="columns is-multiline p-6">
-      <cardevent-component id="1" description="test" name="Anniversaire de Baptiste" />
-      <cardevent-component id="2" description="test" name="Anniversaire de Calvin" />
-      <cardevent-component description="test" name="Anniversaire de Lucas" />
-      <cardevent-component description="test" name="Anniversaire de Kévin" />
-      <cardevent-component description="test" name="Anniversaire de Jean" />
+    <div class="columns is-multiline p-6" v-if="ready">
+      <template v-for="event in events">
+        <cardevent-component :id="event.id" :description="event.description" :name="event.title" />
+      </template>
     </div>
   </div>
 </template>
@@ -20,9 +18,22 @@ import NavbarComponent from "@/components/NavbarComponent";
 import CardeventComponent from "@/components/CardeventComponent";
 export default {
   name: 'HomeView',
+  data() {
+    return{
+      events: [],
+      ready: false
+    }
+  },
   components: {
     CardeventComponent,
     NavbarComponent,
+  },
+  mounted() {
+    this.axios.get('http://api.event.local:62560/events')
+    .then(response => {
+      this.events = response.data.events
+      this.ready = true
+    })
   }
 }
 </script>

@@ -14,7 +14,8 @@
         <h5 class="subtitle mt-1 is-5" v-if="!isLoading"> Quand ? {{ dateConverter }} </h5>
         <h5 class="subtitle mt-1 is-5"> Où ? {{ eventInfo.event.address }} </h5>
         <div>
-          <b-button type="is-info is-light" @click="isCardModalActive=true">Voir les participants</b-button>
+          <b-button v-if="this.eventInfo.users.length > 0" type="is-info is-light" @click="isCardModalActive=true">Voir les participants</b-button>
+          <b-button v-else type="is-info is-light">Aucun participant</b-button>
         </div>
       </div>
       <hr>
