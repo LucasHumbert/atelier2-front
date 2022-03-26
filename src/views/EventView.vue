@@ -64,7 +64,7 @@
               </div>
 
               <ul v-if="parseInt(selectedFilterOption) === 3">
-                <li v-for="user in this.eventInfo.users">
+                <li v-for="user in participants">
                   {{ user.firstname }} -
                   <span v-if="user.choice === 1" class="is-italic has-text-success"> Participe</span>
                   <span v-else-if="user.choice === 0" class="is-italic has-text-danger"> Ne participe pas</span>
@@ -99,25 +99,39 @@
         </div>
       </b-modal>
     </div>
-    <div class="card">
+    <div class="card is-flex is-flex-direction-column-reverse" style="max-height: calc(100vh - 620px); overflow-y: scroll">
       <div class="card-content mt-2">
-        <template v-for="text in textHtml">
-          <strong> {{ firstname }} {{ lastname }}</strong> {{ text }} <br>
+        <template v-for="message in messages">
+          <MessageComponent :message="message"></MessageComponent>
         </template>
       </div>
+    </div>
+    <div v-if="this.$store.state.accessToken">
+      <form @submit.prevent="sendMessage(newMessage, 0)" class="is-flex">
+        <b-input type="text" style="width: 100%;" v-model="newMessage" autofocus grouped>
+        </b-input>
+        <button class="button"><i class="far fa-paper-plane"></i></button>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
+import MessageComponent from "@/components/MessageComponent";
 
 export default {
   name: "EventView",
+  components: {
+    MessageComponent
+  },
   data() {
     return {
       eventInfo: {},
+      participants: [],
       guests: [],
+      messages: [],
       inEvent: false,
+      newMessage: '',
       showButtonGuest: true,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
@@ -127,7 +141,6 @@ export default {
       ready: false,
       urlToCopy: window.location.href,
       choice: '',
-      textHtml: [],
       firstname: '',
       lastname: '',
       showChoiceButton: true,
@@ -152,7 +165,7 @@ export default {
         headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
       })
       .then((response) => {
-        this.firstname = response.data.userConnected.firstname;
+        this.firstname = response.data.userConnected.firstname
         this.lastname = response.data.userConnected.lastname
         this.inEvent = response.data.inEvent
         if (this.inEvent === true && response.data.choice !== 2) {
@@ -164,6 +177,7 @@ export default {
     this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`)
     .then((response) => {
       this.eventInfo = response.data;
+      this.participants = this.eventInfo.users
       this.isLoading = false;
       this.ready = true
     });
@@ -173,6 +187,10 @@ export default {
       this.guests = response.data.guests
     })
 
+    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}/messages`)
+    .then(response => {
+      this.messages = response.data.messages
+    })
   },
   methods: {
     copyToClipboard() {
@@ -189,9 +207,11 @@ export default {
         .then((response) => {
           this.inEvent = true
           if (value === 1) {
-            this.textHtml.push(' : Je viendrai')
+            this.messages.push({'content': 'Je viens !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+            this.sendMessage('Je viens !')
           } else if (value === 0) {
-            this.textHtml.push(' : Je ne viendrai pas')
+            this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+            this.sendMessage('Je viens pas !')
           }
         })
         .catch(function (error) {
@@ -203,17 +223,36 @@ export default {
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
         })
-            .then((response) => {
-              if (value === 1) {
-                this.textHtml.push(' : Je viendrai')
-              } else if (value === 0) {
-                this.textHtml.push(' : Je ne viendrai pas')
-              }
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+        .then((response) => {
+          if (value === 1) {
+            this.messages.push({'content': 'Je viens !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+            this.sendMessage('Je viens !')
+          } else if (value === 0) {
+            this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+            this.sendMessage('Je viens pas !')
+          } else {
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       }
+    },
+    sendMessage(content, auto = 1) {
+      this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/message/`, {
+        content: content
+      }, {
+        headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
+      })
+      .then((response) => {
+        if (auto === 0) {
+          this.messages.push({'content': content,'user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+        }
+        this.newMessage = ''
+      })
+      .catch(function (error) {
+        console.log(error)
+      });
     },
     guestJoin() {
       this.$buefy.dialog.prompt({
