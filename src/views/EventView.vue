@@ -117,6 +117,7 @@ export default {
     return {
       eventInfo: {},
       guests: [],
+      inEvent: false,
       showButtonGuest: true,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
@@ -153,7 +154,8 @@ export default {
       .then((response) => {
         this.firstname = response.data.userConnected.firstname;
         this.lastname = response.data.userConnected.lastname
-        if (response.data.inEvent === true && response.data.choice !== 2) {
+        this.inEvent = response.data.inEvent
+        if (this.inEvent === true && response.data.choice !== 2) {
           this.showChoiceButton = false
         }
       });
@@ -178,13 +180,14 @@ export default {
       this.$buefy.toast.open("Vous avez copié le lien de l'événement dans le presse-papier")
     },
     changeChoice(value) {
-      if (this.eventInfo.inEvent === false) {
+      if (this.inEvent === false) {
         this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`, {
           choice: value
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
         })
         .then((response) => {
+          this.inEvent = true
           if (value === 1) {
             this.textHtml.push(' : Je viendrai')
           } else if (value === 0) {
