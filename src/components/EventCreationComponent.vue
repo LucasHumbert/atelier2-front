@@ -121,7 +121,7 @@ export default {
   data() {
     return {
       minutesGranularity: 15,
-      hoursGranularity: 2,
+      hoursGranularity: 1,
       title: '',
       description: '',
       street: '',

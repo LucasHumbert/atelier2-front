@@ -52,6 +52,7 @@ export default {
   methods: {
     disconnect(){
       this.$store.commit('setToken', false)
+      this.$store.commit('setUserId', false)
     }
   }
 }
