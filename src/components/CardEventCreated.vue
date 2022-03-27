@@ -1,10 +1,11 @@
 <template>
-  <div class="une_recette column is-4" style="position: relative">
-    <router-link :to="{ name:'event' , params:{ id: event.id }}">
+  <div class="column is-4">
       <div class="card">
-        <div class="card-header">
-          <h1 class="card-header-title is-centered">{{ event.title }}</h1>
-        </div>
+        <router-link :to="{ name:'event' , params:{ id: event.id }}">
+          <div class="card-header">
+            <h1 class="card-header-title is-centered">{{ event.title }}</h1>
+          </div>
+        </router-link>
         <div class="card-content">
           <div class="is-mobile">
             <div class="content">
@@ -15,15 +16,22 @@
             </div>
           </div>
         </div>
+        <div class="has-text-centered">
+          <b-button @click="callParent" class="is-danger" id="delete">Delete</b-button>
+        </div>
       </div>
-    </router-link>
   </div>
 </template>
 
 <script>
 export default {
   name: "CardEventCreated",
-  props : ['event']
+  props: ['event'],
+  methods: {
+    callParent () {
+      this.$emit('refresh', this.event.id)
+    }
+  }
 }
 </script>
 
