@@ -21,9 +21,11 @@
                     label="Notif !"
                     type="is-danger"/>
               </template>
-              <b-dropdown-item aria-role="listitem">Vous avez été invité à un évènement!</b-dropdown-item>
-              <b-dropdown-item aria-role="listitem">Vous avez été invité à un évènement!</b-dropdown-item>
-              <b-dropdown-item aria-role="listitem">Vous avez été invité à un évènement!</b-dropdown-item>
+              <b-dropdown-item v-for="event in events" :event="event" aria-role="listitem">
+                <router-link :to="{ name:'event' , params:{ id: event.id }}">
+                  Vous êtes invité à l'évènement : {{ event.title }}
+                </router-link>
+              </b-dropdown-item>
             </b-dropdown>
           </b-navbar-item>
           <b-navbar-item v-else tag="router-link" to="" class="is-size-5">
@@ -43,7 +45,21 @@
 export default {
   data () {
     return {
-      notification: false
+      notification: false,
+      events: []
+    }
+  },
+  mounted (){
+    this.loadEvents()
+  },
+  methods: {
+    loadEvents() {
+      this.axios.get(`${this.$urlEvent}/users/${this.$store.state.user_id}/events`,{
+        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
+      }).then(response => {
+        this.events = response.data.events.filter(event => event.choice === 2)
+        this.notification = true
+      })
     }
   }
 }
