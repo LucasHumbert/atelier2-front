@@ -49,12 +49,12 @@ export default {
       })
     },
     deleteEvent (id) {
-      this.ready = false
       this.$buefy.dialog.confirm({
         message: "La <b>suppression</b> de l'évènement n'est pas réversible. Êtes vous sûre de vouloir continuer?",
         type: 'is-danger',
         hasIcon: true,
         onConfirm: () => {
+          this.ready = false
           this.$buefy.toast.open('Suppression confirmée')
           this.axios.delete(`${this.$urlEvent}/events/${id}`,{
             headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
