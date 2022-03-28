@@ -7,7 +7,7 @@
     </div>
     <div class="columns is-multiline p-6" v-if="ready">
       <template v-for="event in events">
-        <cardevent-component :id="event.id" :description="event.description" :name="event.title" />
+        <cardevent-component :event="event" />
       </template>
     </div>
   </div>

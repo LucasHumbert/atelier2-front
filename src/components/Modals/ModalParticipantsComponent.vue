@@ -17,7 +17,7 @@
 
         <ul v-if="parseInt(selectedFilterOption) === 3">
           <li v-for="user in participants">
-            {{ user.firstname }} -
+            {{ user.lastname + " " + user.firstname }} -
             <span v-if="user.choice === 1" class="is-italic has-text-success"> Participe</span>
             <span v-else-if="user.choice === 0" class="is-italic has-text-danger"> Ne participe pas</span>
             <span v-else class="is-italic has-text-info"> Indécis</span>
@@ -25,7 +25,7 @@
         </ul>
         <ul v-else>
           <li v-for="user in this.eventInfo.users.filter(el => { return el.choice === parseInt(selectedFilterOption) })">
-            {{ user.firstname }}
+            {{ user.lastname + " " + user.firstname }}
           </li>
         </ul>
       </div>

@@ -34,20 +34,27 @@
           </div>
         </div>
         <hr>
-        <div v-if="this.$store.state.accessToken && parseInt(this.$store.state.user_id) !== parseInt(this.eventInfo.event.creator_id)">
-          <div class="is-flex is-justify-content-center" v-if="showChoiceButton">
-            <button class="button is-success mr-4" @click="changeChoice(1); showChoiceButton = false">Je viens !
-            </button>
-            <button class="button is-danger" @click="changeChoice(0); showChoiceButton = false">Je ne viens pas !
-            </button>
+        <template v-if="!done">
+          <div v-if="this.$store.state.accessToken && this.$store.state.user_id !== this.eventInfo.event.creator_id">
+            <div class="is-flex is-justify-content-center" v-if="showChoiceButton">
+              <button class="button is-success mr-4" @click="changeChoice(1); showChoiceButton = false">Je viens !
+              </button>
+              <button class="button is-danger" @click="changeChoice(0); showChoiceButton = false">Je ne viens pas !
+              </button>
+            </div>
+            <div class="is-flex is-justify-content-center" v-else>
+              <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true">J'ai changé d'avis</button>
+            </div>
           </div>
-          <div class="is-flex is-justify-content-center" v-else>
-            <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true">J'ai changé d'avis</button>
+          <div v-else-if="this.$store.state.user_id !== this.eventInfo.event.creator_id">
+            <button v-if="showButtonGuest" class="button is-link" @click="guestJoin">Rejoindre en tant qu'invité</button>
           </div>
-        </div>
-        <div v-else-if="parseInt(this.$store.state.user_id) !== parseInt(this.eventInfo.event.creator_id)">
-          <button v-if="showButtonGuest" class="button is-link" @click="guestJoin">Rejoindre en tant qu'invité</button>
-        </div>
+        </template>
+        <template v-else>
+          <div class="has-text-centered">
+            Événement terminé
+          </div>
+        </template>
       </div>
 
       <!-- Modal participants -->
@@ -97,6 +104,7 @@ export default {
       messages: [],
       inEvent: false,
       newMessage: '',
+      done: false,
       showButtonGuest: true,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
@@ -141,6 +149,7 @@ export default {
     this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`)
     .then((response) => {
       this.eventInfo = response.data;
+      this.done = response.data.event.done
       this.participants = this.eventInfo.users
       this.isLoading = false;
       this.ready = true
@@ -257,7 +266,6 @@ export default {
             mail: value
           })
           .then(response => {
-            console.log(response.data)
             this.participants.push({ "user_id": response.data.user.user_id, "firstname": response.data.user.firstname, "lastname": response.data.user.lastname, "choice": 2 })
             this.inEvent = true
           })
