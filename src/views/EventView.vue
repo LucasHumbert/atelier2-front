@@ -179,6 +179,7 @@ export default {
   },
   methods: {
     meteoAPI () {
+      //Get Openweather API
       this.axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${this.lat}&lon=${this.lon}&exclude=hourly,daily&appid=a4ebf009d3cd58878c01e6f142fa8f40&lang=fr&units=metric`)
           .then((response) => {
             console.log(response.data)
