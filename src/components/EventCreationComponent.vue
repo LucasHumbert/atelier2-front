@@ -180,7 +180,11 @@ export default {
               this.housenumber = data.housenumber
               this.street = data.street
               this.city = data.city
-              this.address = data.city + " " + data.housenumber + " " + data.street
+              if (data.housenumber) {
+                this.address = data.city + " " + data.housenumber + " " + data.street
+              } else {
+                this.address = data.city + " " + data.street
+              }
           })
           .catch(function (error) {
             console.log(error);

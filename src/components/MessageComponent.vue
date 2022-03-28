@@ -2,7 +2,13 @@
   <div>
     <span class="has-text-weight-bold">{{ message.user.firstname + " " +  message.user.lastname}}</span>
      :
-    {{ message.content }}
+    <template v-if="message.content.includes('https://www.youtube.com/watch')">
+      {{ this.newContent }}
+      <youtube :video-id="videoId"></youtube>
+    </template>
+    <template v-else>
+      <span v-html="message.content">{{ message.content }}</span>
+    </template>
     <br>
   </div>
 </template>
@@ -10,7 +16,21 @@
 <script>
 export default {
   name: "MessageComponent",
-  props: ['message']
+  props: ['message'],
+  data() {
+    return{
+      videoId: '',
+      newContent: ''
+    }
+  },
+  mounted() {
+    if (this.message.content.includes('https://www.youtube.com/watch')) {
+      let indexOfLink =this.message.content.indexOf('https://www.youtube.com/watch')
+      let link = this.message.content.slice(indexOfLink)
+      this.newContent = this.message.content.slice(0, indexOfLink)
+      this.videoId = this.$youtube.getIdFromURL(link)
+    }
+  }
 }
 </script>
 
