@@ -61,16 +61,6 @@ export default {
         this.notification = true
       })
     }
-  },
-  methods : {
-    loadEvents(){
-      this.axios.get(`${this.$urlEvent}/users/events`,{
-        headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
-      }).then(response => {
-        response.data.events.forEach()
-        //this.events = response.data.events
-      })
-    }
   }
 }
 </script>
