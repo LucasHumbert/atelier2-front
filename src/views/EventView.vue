@@ -16,7 +16,12 @@
           <h5 class="subtitle mt-1 is-5" v-if="!isLoading"> Quand ? {{ dateConverter }} </h5>
           <h5 class="subtitle mt-1 is-5"> Où ? {{ eventInfo.event.address }} </h5>
           <h5 class="subtitle mt-1 is-5"> Organisateur : {{ organisateur }}</h5>
-          <button class="button is-info" @click="copyToClipboard"> Copier le lien d'invitation</button>
+          <div class="is-flex is-align-items-center">
+            <button class="button is-info" @click="copyToClipboard">Copier le lien d'invitation</button>
+            <p class="mx-3">OU</p>
+            <button class="button is-info" @click="invitWithMail">Inviter un utilisateur</button>
+          </div>
+
           <div class="mt-3">
             <b-button v-if="this.eventInfo.users && this.eventInfo.users.length > 0" type="is-info is-light"
                       @click="isCardModalActive=true">Voir les participants
@@ -29,7 +34,7 @@
           </div>
         </div>
         <hr>
-        <div v-if="this.$store.state.accessToken">
+        <div v-if="this.$store.state.accessToken && parseInt(this.$store.state.user_id) !== parseInt(this.eventInfo.event.creator_id)">
           <div class="is-flex is-justify-content-center" v-if="showChoiceButton">
             <button class="button is-success mr-4" @click="changeChoice(1); showChoiceButton = false">Je viens !
             </button>
@@ -40,63 +45,19 @@
             <button class="button is-dark" @click="changeChoice(2); showChoiceButton = true">J'ai changé d'avis</button>
           </div>
         </div>
-        <div v-else>
+        <div v-else-if="parseInt(this.$store.state.user_id) !== parseInt(this.eventInfo.event.creator_id)">
           <button v-if="showButtonGuest" class="button is-link" @click="guestJoin">Rejoindre en tant qu'invité</button>
         </div>
       </div>
 
       <!-- Modal participants -->
       <b-modal v-model="isCardModalActive" :width="640">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-header-title is-size-4">Participants à {{ eventInfo.event.title }}</div>
-          </div>
-          <div class="card-content">
-            <div class="content">
-              <div class="has-text-centered">
-                Trier par
-                <select v-model="selectedFilterOption">
-                  <option value="3">Tous</option>
-                  <option value="0">Ne participe pas</option>
-                  <option value="1">Participe</option>
-                  <option value="2">Indécis</option>
-                </select>
-              </div>
-
-              <ul v-if="parseInt(selectedFilterOption) === 3">
-                <li v-for="user in participants">
-                  {{ user.firstname }} -
-                  <span v-if="user.choice === 1" class="is-italic has-text-success"> Participe</span>
-                  <span v-else-if="user.choice === 0" class="is-italic has-text-danger"> Ne participe pas</span>
-                  <span v-else class="is-italic has-text-info"> Indécis</span>
-                </li>
-              </ul>
-              <ul v-else>
-                <li v-for="user in this.eventInfo.users.filter(el => { return el.choice === parseInt(selectedFilterOption) })">
-                  {{ user.firstname }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <ModalParticipantsComponent :event-info="eventInfo" :participants="participants"></ModalParticipantsComponent>
       </b-modal>
 
       <!-- Modal guests -->
       <b-modal v-model="isModalGuestsActive" :width="640">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-header-title is-size-4">Invités de {{ eventInfo.event.title }}</div>
-          </div>
-          <div class="card-content">
-            <div class="content">
-              <ul>
-                <li v-for="guest in this.guests">
-                  {{ guest.name }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <ModalGuestsComponent :event-info="eventInfo" :guests="guests"></ModalGuestsComponent>
       </b-modal>
     </div>
     <div class="card is-flex is-flex-direction-column-reverse" style="max-height: calc(100vh - 620px); overflow-y: scroll">
@@ -118,11 +79,15 @@
 
 <script>
 import MessageComponent from "@/components/MessageComponent";
+import ModalParticipantsComponent from "@/components/Modals/ModalParticipantsComponent";
+import ModalGuestsComponent from "@/components/Modals/ModalGuestsComponent";
 
 export default {
   name: "EventView",
   components: {
-    MessageComponent
+    MessageComponent,
+    ModalParticipantsComponent,
+    ModalGuestsComponent
   },
   data() {
     return {
@@ -145,8 +110,7 @@ export default {
       lastname: '',
       showChoiceButton: true,
       isCardModalActive: false,
-      isModalGuestsActive: false,
-      selectedFilterOption: 3
+      isModalGuestsActive: false
     };
   },
   computed: {
@@ -213,6 +177,7 @@ export default {
             this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
             this.sendMessage('Je viens pas !')
           }
+          this.participants.push({ "user_id": this.$store.state.user_id, "firstname": this.firstname, "lastname": this.lastname, "choice": value })
         })
         .catch(function (error) {
           console.log(error);
@@ -230,8 +195,12 @@ export default {
           } else if (value === 0) {
             this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
             this.sendMessage('Je viens pas !')
-          } else {
           }
+          this.participants.forEach(el => {
+            if (el.user_id === this.$store.state.user_id) {
+              el.choice = value
+            }
+          })
         })
         .catch(function (error) {
           console.log(error);
@@ -272,6 +241,28 @@ export default {
           })
           .catch(error => {
             console.log(error)
+          })
+        }
+      })
+    },
+    invitWithMail() {
+      this.$buefy.dialog.prompt({
+        message: `Entrer le mail de la personne que vous souhaitez inviter ?`,
+        inputAttrs: {
+          maxlength: 125
+        },
+        trapFocus: true,
+        onConfirm: (value) => {
+          this.axios.post(`http://api.event.local:62560/events/${this.$route.params.id}/invitation`, {
+            mail: value
+          })
+          .then(response => {
+            console.log(response.data)
+            this.participants.push({ "user_id": response.data.user.user_id, "firstname": response.data.user.firstname, "lastname": response.data.user.lastname, "choice": 2 })
+            this.inEvent = true
+          })
+          .catch(error => {
+            this.$buefy.toast.open(`Une erreur est survenue`)
           })
         }
       })
