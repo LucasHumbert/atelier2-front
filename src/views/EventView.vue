@@ -8,6 +8,17 @@
           <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
           <l-marker :lat-lng="[this.eventInfo.event.lat, this.eventInfo.event.lon]"></l-marker>
         </l-map>
+        <div class="box is-flex is-justify-content-space-around is-align-items-center">
+          <div class="is-flex is-align-items-center is-size-5">
+            <img v-if="meteo.temperature > 15" src="@/assets/sun.png" alt="soleil" class="mr-4">
+            <img v-else-if="meteo.temperature > 5" src="@/assets/cloud.png" alt="soleil" class="mr-4">
+            <img v-else src="@/assets/snowflake.png" alt="soleil" class="mr-4">
+            {{meteo.temperature}} °C
+          </div>
+          <div class="is-size-4">
+            {{meteo.desc}}
+          </div>
+        </div>
       </div>
       <div class="column is-half">
         <div>
@@ -67,7 +78,7 @@
         <ModalGuestsComponent :event-info="eventInfo" :guests="guests"></ModalGuestsComponent>
       </b-modal>
     </div>
-    <div class="card is-flex is-flex-direction-column-reverse" style="max-height: calc(100vh - 620px); overflow-y: scroll">
+    <div class="card is-flex is-flex-direction-column-reverse" style="max-height: calc(100vh - 620px); overflow-y: scroll; margin-top: 100px;">
       <div class="card-content mt-2">
         <template v-for="message in messages">
           <MessageComponent :message="message"></MessageComponent>
@@ -81,6 +92,7 @@
         <button class="button"><i class="far fa-paper-plane"></i></button>
       </form>
     </div>
+
   </div>
 </template>
 
@@ -98,6 +110,8 @@ export default {
   },
   data() {
     return {
+      lat: '',
+      lon: '',
       eventInfo: {},
       participants: [],
       guests: [],
@@ -118,7 +132,11 @@ export default {
       lastname: '',
       showChoiceButton: true,
       isCardModalActive: false,
-      isModalGuestsActive: false
+      isModalGuestsActive: false,
+      meteo:  {
+        temperature: '',
+        desc: ''
+      }
     };
   },
   computed: {
@@ -153,6 +171,9 @@ export default {
       this.participants = this.eventInfo.users
       this.isLoading = false;
       this.ready = true
+      this.lat = this.eventInfo.event.lat
+      this.lon = this.eventInfo.event.lon
+      this.meteoAPI()
     });
 
     this.axios.get(`http://api.event.local:62560/guests/${this.$route.params.id}`)
@@ -166,6 +187,16 @@ export default {
     })
   },
   methods: {
+    meteoAPI () {
+      //Get Openweather API
+      this.axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${this.lat}&lon=${this.lon}&exclude=hourly,daily&appid=a4ebf009d3cd58878c01e6f142fa8f40&lang=fr&units=metric`)
+          .then((response) => {
+            console.log(response.data)
+            this.meteo.temperature = Math.round(response.data.current.temp)
+            this.meteo.desc = response.data.current.weather[0].description
+            this.meteo.desc = this.meteo.desc.charAt(0).toUpperCase() + this.meteo.desc.slice(1)
+          });
+    },
     copyToClipboard() {
       navigator.clipboard.writeText(this.urlToCopy);
       this.$buefy.toast.open("Vous avez copié le lien de l'événement dans le presse-papier")
@@ -280,5 +311,7 @@ export default {
 </script>
 
 <style scoped>
-
+img {
+  height: 50px
+}
 </style>
