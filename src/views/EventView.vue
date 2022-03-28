@@ -177,6 +177,7 @@ export default {
             this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
             this.sendMessage('Je viens pas !')
           }
+          this.participants.push({ "user_id": this.$store.state.user_id, "firstname": this.firstname, "lastname": this.lastname, "choice": value })
         })
         .catch(function (error) {
           console.log(error);
@@ -194,8 +195,12 @@ export default {
           } else if (value === 0) {
             this.messages.push({'content': 'Je viens pas !','user': { 'firstname': this.firstname, 'lastname': this.lastname}})
             this.sendMessage('Je viens pas !')
-          } else {
           }
+          this.participants.forEach(el => {
+            if (el.user_id === this.$store.state.user_id) {
+              el.choice = value
+            }
+          })
         })
         .catch(function (error) {
           console.log(error);
@@ -253,9 +258,11 @@ export default {
           })
           .then(response => {
             console.log(response.data)
+            this.participants.push({ "user_id": response.data.user.user_id, "firstname": response.data.user.firstname, "lastname": response.data.user.lastname, "choice": 2 })
+            this.inEvent = true
           })
           .catch(error => {
-            console.log(error)
+            this.$buefy.toast.open(`Une erreur est survenue`)
           })
         }
       })
