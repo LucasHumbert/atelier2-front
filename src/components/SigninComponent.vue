@@ -58,8 +58,8 @@ export default {
             password: this.userInfo.password
           }
         }).then((response) => {
-          console.log(response.data.accessToken)
           this.$store.commit('setToken', response.data.accessToken)
+          this.$store.commit('setUserId', response.data.user_id)
           this.$router.push('/')
         }).catch(error => this.$buefy.toast.open({
               duration: 5000,

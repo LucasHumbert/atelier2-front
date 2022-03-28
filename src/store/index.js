@@ -11,6 +11,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     accessToken: "",
+    user_id: ''
   },
   getters: {
 
@@ -18,6 +19,9 @@ export default new Vuex.Store({
   mutations: {
     setToken(state, token){
       state.accessToken = token
+    },
+    setUserId(state, user_id){
+      state.user_id = user_id
     },
   },
   actions: {

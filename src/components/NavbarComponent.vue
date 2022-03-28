@@ -1,7 +1,7 @@
 <template>
   <b-navbar class="type is-primary mb-4">
     <template #brand>
-      <b-navbar-item tag="router-link" :to="{ path: '/' }">
+      <b-navbar-item>
         <img
             src="@/assets/Reunionou-logo.png"
             alt="Lightweight UI components for Vue.js based on Bulma"
@@ -9,10 +9,10 @@
       </b-navbar-item>
     </template>
     <template #start>
-      <b-navbar-item href="/">
+      <b-navbar-item tag="router-link" :to="{ path: '/' }">
         Home
       </b-navbar-item>
-      <b-navbar-item v-if="$store.state.accessToken" href="/profil">
+      <b-navbar-item v-if="$store.state.accessToken"  tag="router-link" :to="{ path: '/profil' }">
         Profil
       </b-navbar-item>
     </template>
@@ -20,12 +20,16 @@
     <template #end v-if="!this.$store.state.accessToken">
       <b-navbar-item tag="div">
         <div class="buttons">
-          <a class="button is-primary" @click="$router.push('/signup')">
-            <strong>Inscription</strong>
-          </a>
-          <a class="button is-light" @click="$router.push('/signin')">
-            Connexion
-          </a>
+          <router-link to="/signup">
+            <a class="button is-primary">
+              <strong>S'inscrire</strong>
+            </a>
+          </router-link>
+          <router-link to="/signin">
+            <a class="button is-light">
+              Se connecter
+            </a>
+          </router-link>
         </div>
       </b-navbar-item>
     </template>
@@ -48,7 +52,7 @@ export default {
   methods: {
     disconnect(){
       this.$store.commit('setToken', false)
-      this.$router.push('/')
+      this.$store.commit('setUserId', false)
     }
   }
 }

@@ -121,7 +121,7 @@ export default {
   data() {
     return {
       minutesGranularity: 15,
-      hoursGranularity: 2,
+      hoursGranularity: 1,
       title: '',
       description: '',
       street: '',
@@ -180,7 +180,11 @@ export default {
               this.housenumber = data.housenumber
               this.street = data.street
               this.city = data.city
-              this.address = data.city + " " + data.housenumber + " " + data.street
+              if (data.housenumber) {
+                this.address = data.city + " " + data.housenumber + " " + data.street
+              } else {
+                this.address = data.city + " " + data.street
+              }
           })
           .catch(function (error) {
             console.log(error);
@@ -208,7 +212,7 @@ export default {
         });
       } else {
         this.$buefy.toast.open({
-          duration: 5000,
+          duration: 2000,
           message: `Veuillez renseigner tous les champs`,
           type: 'is-danger'
         })

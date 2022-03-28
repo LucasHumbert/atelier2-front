@@ -16,7 +16,7 @@
 <script>
 export default {
   name: "CardeventComponent",
-  props: ['name', 'description', 'id']
+  props: ['name', 'description', 'id'],
 }
 </script>
 

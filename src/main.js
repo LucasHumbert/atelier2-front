@@ -10,6 +10,7 @@ import VueAxios from 'vue-axios'
 import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Icon } from 'leaflet';
+import VueYouTubeEmbed from 'vue-youtube-embed'
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -25,6 +26,7 @@ Vue.component('l-marker', LMarker);
 
 Vue.use(Buefy)
 Vue.use(VueAxios, axios)
+Vue.use(VueYouTubeEmbed)
 
 Vue.prototype.$urlEvent = 'http://api.event.local:62560/';
 
