@@ -223,7 +223,7 @@ export default {
           console.log(error);
         });
       } else {
-        this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`, {
+        this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/${this.$store.state.user_id}`, {
           choice: value
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
