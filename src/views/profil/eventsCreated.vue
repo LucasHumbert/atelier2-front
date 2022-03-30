@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     loadEvents() {
-      this.axios.get(`${this.$urlEvent}/events?creator_id=${this.$store.state.user_id}`,{
+      this.axios.get(`${this.$urlEvent}events?creator_id=${this.$store.state.user_id}`,{
         headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
       }).then(response => {
         this.events = response.data.events
@@ -56,7 +56,7 @@ export default {
         onConfirm: () => {
           this.ready = false
           this.$buefy.toast.open('Suppression confirmée')
-          this.axios.delete(`${this.$urlEvent}/events/${id}`,{
+          this.axios.delete(`${this.$urlEvent}events/${id}`,{
             headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
           })
           this.loadEvents()

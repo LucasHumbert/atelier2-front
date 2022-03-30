@@ -28,7 +28,8 @@ Vue.use(Buefy)
 Vue.use(VueAxios, axios)
 Vue.use(VueYouTubeEmbed)
 
-Vue.prototype.$urlEvent = 'http://api.event.local:62560/';
+Vue.prototype.$urlEvent = 'http://51.159.78.9:62560/';
+Vue.prototype.$urlAuth = 'http://51.159.78.9:62563/';
 
 Vue.config.productionTip = false
 

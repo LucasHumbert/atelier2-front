@@ -100,7 +100,7 @@ export default {
       this.edit.splice(this.edit.indexOf(name), 1)
     },
     loadUserInfos () {
-      this.axios.get(`${this.$urlEvent}/users/${this.$store.state.user_id}`, {
+      this.axios.get(`${this.$urlEvent}users/${this.$store.state.user_id}`, {
         headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
       }).then(response => {
         this.prenom = response.data.user.firstname
@@ -109,7 +109,7 @@ export default {
       })
     },
     putInfos () {
-      this.axios.put(`${this.$urlEvent}/users/${this.$store.state.user_id}`, {
+      this.axios.put(`${this.$urlEvent}users/${this.$store.state.user_id}`, {
         firstname: this.prenom,
         lastname: this.nom,
       },{

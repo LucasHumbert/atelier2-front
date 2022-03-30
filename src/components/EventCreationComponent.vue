@@ -193,7 +193,7 @@ export default {
     postEvent() {
       if (this.title !== '' && this.description !== '' && this.address !== '') {
         let fusion = this.date.toISOString().split('T')[0] + ' ' + this.hours.toLocaleTimeString()
-        this.axios.post(`http://api.event.local:62560/events`, {
+        this.axios.post(`${this.$urlEvent}events`, {
           title: this.title,
           description: this.description,
           address: this.address,
