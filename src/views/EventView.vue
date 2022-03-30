@@ -184,6 +184,11 @@ export default {
     this.axios.get(`${this.$urlEvent}events/${this.$route.params.id}/messages`)
     .then(response => {
       this.messages = response.data.messages
+      this.messages.sort(function(a, b) {
+        var c = new Date(a.date);
+        var d = new Date(b.date);
+        return c-d;
+      });
     })
   },
   methods: {
@@ -198,7 +203,8 @@ export default {
           });
     },
     copyToClipboard() {
-      navigator.clipboard.writeText(this.urlToCopy);
+      // navigator.clipboard.writeText(this.urlToCopy);
+
       this.$buefy.toast.open("Vous avez copié le lien de l'événement dans le presse-papier")
     },
     changeChoice(value) {
@@ -248,20 +254,25 @@ export default {
       }
     },
     sendMessage(content, auto = 1) {
-      this.axios.post(`${this.$urlEvent}events/${this.eventInfo.event.id}/message/`, {
-        content: content
-      }, {
-        headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
-      })
-      .then((response) => {
-        if (auto === 0) {
-          this.messages.push({'content': content,'user': { 'firstname': this.firstname, 'lastname': this.lastname}})
-        }
-        this.newMessage = ''
-      })
-      .catch(function (error) {
-        console.log(error)
-      });
+      if(this.newMessage.length === 0 || this.newMessage === ' '){
+        this.$buefy.toast.open({message:`Vous ne pouvez pas envoyer un message vide !`,type: 'is-danger'})
+      }
+      else{
+        this.axios.post(`${this.$urlEvent}events/${this.eventInfo.event.id}/message/`, {
+          content: content
+        }, {
+          headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
+        })
+            .then((response) => {
+              if (auto === 0) {
+                this.messages.push({'content': content,'user': { 'firstname': this.firstname, 'lastname': this.lastname}})
+              }
+              this.newMessage = ''
+            })
+            .catch(function (error) {
+              console.log(error)
+            });
+      }
     },
     guestJoin() {
       this.$buefy.dialog.prompt({
@@ -293,9 +304,9 @@ export default {
         },
         trapFocus: true,
         onConfirm: (value) => {
-          this.axios.post(`http://api.event.local:62560/events/${this.$route.params.id}/users?findUserBy[]=email`, {
+          this.axios.post(`${this.$urlEvent}events/${this.$route.params.id}/users?findUserBy[]=email`, {
             mail: value
-          }, {
+          },{
             headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
           })
           .then(response => {

@@ -54,11 +54,13 @@ export default {
   },
   methods: {
     loadEvents() {
-      this.axios.get(`${this.$urlEvent}/users/${this.$store.state.user_id}/events`,{
+      this.axios.get(`${this.$urlEvent}users/${this.$store.state.user_id}/events`,{
         headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
       }).then(response => {
         this.events = response.data.events.filter(event => event.choice === 2)
-        this.notification = true
+        if(this.events.length !== 0){
+          this.notification = true
+        }
       })
     }
   }
