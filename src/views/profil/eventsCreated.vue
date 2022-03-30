@@ -10,7 +10,7 @@
           <p v-if="events.length === 0">Vous n'avez créé aucun évènement</p>
           <CardEventCreated v-else v-for="event in events" :event="event" @refresh="deleteEvent" style="cursor:pointer;" />
         </div>
-        <div v-else class="has-text-centered">
+        <div v-if="!ready" class="has-text-centered">
           <p>Chargement de vos évènements</p>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default {
           this.axios.delete(`${this.$urlEvent}events/${id}`,{
             headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
           })
-          this.loadEvents()
+          this.events.filter((event, id) => event.id === id)
         }
       })
     }

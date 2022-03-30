@@ -53,6 +53,7 @@ export default {
     disconnect(){
       this.$store.commit('setToken', false)
       this.$store.commit('setUserId', false)
+      this.$router.push('/')
     }
   }
 }

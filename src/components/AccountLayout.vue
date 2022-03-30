@@ -58,7 +58,9 @@ export default {
         headers: { Authorization : `Bearer ${this.$store.state.accessToken}`}
       }).then(response => {
         this.events = response.data.events.filter(event => event.choice === 2)
-        this.notification = true
+        if(this.events.length !== 0){
+          this.notification = true
+        }
       })
     }
   }
