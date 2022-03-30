@@ -5,7 +5,8 @@
 - Houques Baptiste
 - Humbert Lucas
 
-L'application BackOffice du projet Reunionou permet aux utilisateurs de voir les événements
+L'application FrontEnd est la partie principale du projet Reunionou. C'est cette dernière qui va être utilisé
+par les utilisateurs pour créer/voir des événements, y participer et éditer son profil.
 
 ---
 
@@ -23,7 +24,7 @@ L'application BackOffice du projet Reunionou permet aux utilisateurs de voir les
 npm install
 ```
 
-### Lancer serveur de developpement
+### Lancer serveur de développement
 ```
 npm run serve
 ```
