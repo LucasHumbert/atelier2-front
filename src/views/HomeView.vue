@@ -29,7 +29,7 @@ export default {
     NavbarComponent,
   },
   mounted() {
-    this.axios.get('http://api.event.local:62560/events')
+    this.axios.get(`${this.$urlEvent}events`)
     .then(response => {
       this.events = response.data.events
       this.ready = true

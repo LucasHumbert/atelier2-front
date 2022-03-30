@@ -52,7 +52,7 @@ export default {
     },
     login() {
       if (this.validEmail(this.userInfo.email)) {
-        this.axios.get('http://api.auth.local:62563/auth', {
+        this.axios.get(`${this.$urlAuth}auth`, {
           auth: {
             username: this.userInfo.email,
             password: this.userInfo.password

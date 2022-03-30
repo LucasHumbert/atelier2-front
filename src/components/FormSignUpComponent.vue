@@ -99,7 +99,7 @@ export default {
       console.log('Je suis cliqué')
       if (this.nom && this.prenom && this.email && this.password && this.confpassword) {
         if (this.password === this.confpassword) {
-          this.axios.post('http://api.auth.local:62563/register', {
+          this.axios.post(`${this.$urlAuth}register`, {
             firstname: this.nom,
             lastname: this.prenom,
             mail: this.email,

@@ -151,7 +151,7 @@ export default {
   },
   mounted() {
     if (this.$store.state.accessToken) {
-      this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?filter[]=userConnected`, {
+      this.axios.get(`${this.$urlEvent}events/${this.$route.params.id}?filter[]=userConnected`, {
         headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
       })
       .then((response) => {
@@ -164,7 +164,7 @@ export default {
       });
     }
 
-    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}?embed[]=users`)
+    this.axios.get(`${this.$urlEvent}events/${this.$route.params.id}?embed[]=users`)
     .then((response) => {
       this.eventInfo = response.data;
       this.done = response.data.event.done
@@ -176,12 +176,12 @@ export default {
       this.meteoAPI()
     });
 
-    this.axios.get(`http://api.event.local:62560/guests/${this.$route.params.id}`)
+    this.axios.get(`${this.$urlEvent}guests/${this.$route.params.id}`)
     .then(response => {
       this.guests = response.data.guests
     })
 
-    this.axios.get(`http://api.event.local:62560/events/${this.$route.params.id}/messages`)
+    this.axios.get(`${this.$urlEvent}events/${this.$route.params.id}/messages`)
     .then(response => {
       this.messages = response.data.messages
     })
@@ -203,7 +203,7 @@ export default {
     },
     changeChoice(value) {
       if (this.inEvent === false) {
-        this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/`, {
+        this.axios.post(`${this.$urlEvent}events/${this.eventInfo.event.id}/users/`, {
           choice: value
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
@@ -223,7 +223,7 @@ export default {
           console.log(error);
         });
       } else {
-        this.axios.put(`http://api.event.local:62560/events/${this.eventInfo.event.id}/users/${this.$store.state.user_id}`, {
+        this.axios.put(`${this.$urlEvent}events/${this.eventInfo.event.id}/users/${this.$store.state.user_id}`, {
           choice: value
         }, {
           headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
@@ -248,7 +248,7 @@ export default {
       }
     },
     sendMessage(content, auto = 1) {
-      this.axios.post(`http://api.event.local:62560/events/${this.eventInfo.event.id}/message/`, {
+      this.axios.post(`${this.$urlEvent}events/${this.eventInfo.event.id}/message/`, {
         content: content
       }, {
         headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
@@ -271,7 +271,7 @@ export default {
         },
         trapFocus: true,
         onConfirm: (value) => {
-          this.axios.post(`http://api.event.local:62560/guests/${this.$route.params.id}`, {
+          this.axios.post(`${this.$urlEvent}guests/${this.$route.params.id}`, {
             name: value
           })
           .then(() => {
@@ -293,8 +293,10 @@ export default {
         },
         trapFocus: true,
         onConfirm: (value) => {
-          this.axios.post(`http://api.event.local:62560/events/${this.$route.params.id}/invitation`, {
+          this.axios.post(`http://api.event.local:62560/events/${this.$route.params.id}/users?findUserBy[]=email`, {
             mail: value
+          }, {
+            headers: {Authorization: `Bearer ${this.$store.state.accessToken}`}
           })
           .then(response => {
             this.participants.push({ "user_id": response.data.user.user_id, "firstname": response.data.user.firstname, "lastname": response.data.user.lastname, "choice": 2 })
